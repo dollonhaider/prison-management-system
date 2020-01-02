@@ -1,0 +1,142 @@
+package com.prisonManagementSystem.service;
+
+import com.prisonManagementSystem.dto.OfficerUpdateDTO;
+import com.prisonManagementSystem.dto.ResponseDTO;
+import com.prisonManagementSystem.enums.Authority;
+import com.prisonManagementSystem.model.Officer;
+import com.prisonManagementSystem.dto.OfficerCreateDTO;
+import com.prisonManagementSystem.model.Section;
+import com.prisonManagementSystem.model.dummy.User;
+import com.prisonManagementSystem.repository.OfficerRepository;
+import com.prisonManagementSystem.repository.SectionRepository;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Base64;
+import java.util.List;
+
+@Service
+public class OfficerService {
+    private ResponseDTO output = new ResponseDTO();
+    @Autowired
+    private OfficerRepository officerRepository;
+    @Autowired
+    private SectionRepository sectionRepository;
+
+    public ResponseDTO create(OfficerCreateDTO input, User requester) {
+        Officer officer = new Officer();
+        if (requester.hasAuthority(Authority.ROLE_ADMIN)) {
+            Section section = sectionRepository.findByIdAndStatus(new ObjectId(input.getSectionId()), "V");
+            if (section == null) {
+                return output.generateErrorResponse("Permission Denied !! Section not found !!");
+            }
+            if (requester.getSection().equals(section.getSectionName())) {
+                officer = officerRepository.findByEmailAndStatus(input.getEmail(), "V");
+                if (officer == null) {
+                    officer = new Officer();
+                    officer.setFirstName(input.getFirstName());
+                    officer.setLastName(input.getLastName());
+                    officer.setPhoneNo(input.getPhoneNo());
+                    officer.setPassword(encodePassword(input.getPassword()));
+                    officer.setEmail(input.getEmail());
+                    officer.setDesignation(input.getDesignation());
+                    officer.setAuthority(input.getAuthority());
+                    officer.setStatus("V");
+                    officer.setSection(section);
+                    officerRepository.save(officer);
+                } else {
+                    return output.generateErrorResponse(" Already exist !!");
+
+                }
+            } else {
+                return output.generateErrorResponse("Permission Denied!!");
+            }
+        }
+        return output.generateSuccessResponse(officer, "Successfully created");
+    }
+
+    public ResponseDTO getList() {
+        List<Officer> officers = officerRepository.findAllByStatus("V");
+        if (officers == null) {
+            return output.generateErrorResponse("No data found");
+        } else {
+            return output.generateSuccessResponse(officers, "Success!");
+        }
+    }
+
+    public ResponseDTO get(ObjectId id) {
+        Officer officer = officerRepository.findByIdAndStatus(id, "V");
+        if (officer == null) {
+            return output.generateErrorResponse("Data not found");
+        } else {
+            return output.generateSuccessResponse(officer, "Success");
+        }
+    }
+
+    public ResponseDTO update(OfficerUpdateDTO input, User requester)
+    {
+        Officer officer;
+        if (requester.hasAuthority(Authority.ROLE_ADMIN)) {
+            Section section = sectionRepository.findByIdAndStatus(new ObjectId(input.getSectionId()), "V");
+            if (section == null) {
+                return output.generateErrorResponse("Permission Denied !! Section not found !!");
+            }
+            if (requester.getSection().equals(section.getSectionName())) {
+                officer = officerRepository.findByEmailAndStatus(input.getEmail(), "V");
+                if (officer == null && input != null) {
+
+                    officer.setLastName(input.getLastName());
+                    officer.setPhoneNo(input.getPhoneNo());
+                    officer.setEmail(input.getEmail());
+                    officer.setDesignation(input.getDesignation());
+                    officer.setAuthority(input.getAuthority());
+                    officer.setSection(section);
+                    officerRepository.save(officer);
+                    return output.generateSuccessResponse(officer, "successfully updated");
+                } else {
+                    return output.generateErrorResponse("Already exist!!");
+                }
+            } else {
+                return output.generateErrorResponse("Invalid input");
+            }
+        }
+
+        else {
+            return output.generateErrorResponse("Permission Denied!!");
+        }
+    }
+
+
+
+    public ResponseDTO delete(ObjectId id,User requester)
+    {
+        if (requester.hasAuthority(Authority.ROLE_ADMIN))
+        {
+            Officer officer = officerRepository.findByIdAndStatus(id, "V");
+            if (officer == null) {
+                return output.generateErrorResponse("You have entered a wrong id");
+            } else {
+                officer.setStatus("D");
+                officerRepository.save(officer);
+                return output.generateSuccessResponse(officer, "success");
+            }
+
+        }else
+        {
+            return output.generateErrorResponse("Permission Denied!!");
+        }
+
+    }
+
+    public String encodePassword(String password)
+    {
+        String encodedPassword = Base64.getEncoder().encodeToString(password.getBytes());
+        return encodedPassword;
+    }
+    public String decodePassword(String input)
+    {
+        byte[] decodedPassword = Base64.getDecoder().decode(input);
+        return  new String(decodedPassword);
+    }
+}
