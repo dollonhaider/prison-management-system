@@ -16,9 +16,10 @@ public class GuestController {
     @Autowired
     private GuestService guestService;
     @RequestMapping(value = "/guest/create", method = RequestMethod.POST)
-    public ResponseDTO create(@RequestBody GuestCreateDTO input)
+    public ResponseDTO create(@RequestBody GuestCreateDTO input,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = guestService.create(input);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = guestService.create(input,requester);
         return result;
     }
 
@@ -36,15 +37,17 @@ public class GuestController {
         return result;
     }
     @RequestMapping(value = "/guest/update",method = RequestMethod.PUT)
-    public ResponseDTO update(@RequestBody GuestUpdateDTO input)
+    public ResponseDTO update(@RequestBody GuestUpdateDTO input,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = guestService.update(input);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = guestService.update(input,requester);
         return result;
     }
     @RequestMapping(value = "/guest/delete/{id}",method = RequestMethod.DELETE)
-    public ResponseDTO delete(@PathVariable("id") ObjectId id)
+    public ResponseDTO delete(@PathVariable("id") ObjectId id,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = guestService.delete(id);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = guestService.delete(id,requester);
         return result;
     }
 

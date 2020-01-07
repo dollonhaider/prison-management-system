@@ -1,9 +1,12 @@
 package com.prisonManagementSystem.controller;
 
+import com.prisonManagementSystem.constant.HttpHeader;
 import com.prisonManagementSystem.dto.ResponseDTO;
 import com.prisonManagementSystem.dto.SectionCreateDTO;
 import com.prisonManagementSystem.dto.SectionUpdateDTO;
+import com.prisonManagementSystem.model.dummy.User;
 import com.prisonManagementSystem.service.SectionService;
+import com.prisonManagementSystem.utills.Utils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +17,10 @@ public class SectionController {
     SectionService sectionService;
 
     @RequestMapping(value = "/section/create", method = RequestMethod.POST)
-    public ResponseDTO create(@RequestBody SectionCreateDTO input)
+    public ResponseDTO create(@RequestBody SectionCreateDTO input,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = sectionService.create(input);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = sectionService.create(input,requester);
         return result;
     }
 
@@ -33,15 +37,17 @@ public class SectionController {
         return result;
     }
     @RequestMapping(value = "/section/update",method = RequestMethod.PUT)
-    public ResponseDTO update(@RequestBody SectionUpdateDTO input)
+    public ResponseDTO update(@RequestBody SectionUpdateDTO input,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = sectionService.update(input);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = sectionService.update(input,requester);
         return result;
     }
     @RequestMapping(value = "/section/delete/{id}",method = RequestMethod.DELETE)
-    public ResponseDTO delete(@PathVariable("id") ObjectId id)
+    public ResponseDTO delete(@PathVariable("id") ObjectId id,@RequestHeader(value = HttpHeader.REQUESTER) String currentUserStr)
     {
-        ResponseDTO result = sectionService.delete(id);
+        User requester = Utils.generateUserFromJsonStr(currentUserStr);
+        ResponseDTO result = sectionService.delete(id,requester);
         return result;
     }
 
