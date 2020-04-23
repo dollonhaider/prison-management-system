@@ -35,7 +35,7 @@ public class GuestService {
                 return output.generateSuccessResponse(guest, "Successfully created a guest.");
 
             } else {
-                return output.generateErrorResponse("This name already exist");
+                return output.generateErrorResponse("This name is already exist");
             }
         } else{
             return output.generateErrorResponse("Permission Denied!!");
