@@ -38,7 +38,7 @@ public class GuestService {
                 return output.generateErrorResponse("This name is already exist");
             }
         } else{
-            return output.generateErrorResponse("Permission Denied!!");
+            return output.generateErrorResponse("Permission Denied!");
         }
     }
 
