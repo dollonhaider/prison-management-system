@@ -89,7 +89,7 @@ public class GuestService {
                 }
 
                 guestRepository.save(guest);
-                return output.generateSuccessResponse(guest, "successfully updated");
+                return output.generateSuccessResponse(guest, "successfully updated information");
             } else {
                 return output.generateErrorResponse("Invalid input");
             }
