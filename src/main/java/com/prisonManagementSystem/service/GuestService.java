@@ -32,7 +32,7 @@ public class GuestService {
                 guest.setPassword(encodePassword(input.getPassword()));
                 guest.setStatus("V");
                 guestRepository.save(guest);
-                return output.generateSuccessResponse(guest, "Successfully created");
+                return output.generateSuccessResponse(guest, "Successfully created a guest.");
 
             } else {
                 return output.generateErrorResponse("This name already exist");
